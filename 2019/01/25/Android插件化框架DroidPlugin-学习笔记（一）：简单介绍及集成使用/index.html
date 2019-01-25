@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+  <title>Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用 | Gorilla_L</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+    <meta name="keywords" content="MinHow,MinHow's Blog">
+  
+  <meta name="description" content="PS：本文为本人学习的一个过程，大神可直接忽略，若发现有错误之处，请评论留言，小编会及时更正，不喜勿喷，谢谢。  最近公司叫预研一下插件化相关的技术，发现现在开源社区上，关于插件化这个技术的框架也不多，Android插件化主流的实现方案主要就是这两个框架，一个是dynamic-load-apk（简称DL），另一个则是奇虎360手机助手团队的DroidPlugin，这两个框架各有各的优缺点，下面就简">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用">
+<meta property="og:url" content="http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/index.html">
+<meta property="og:site_name" content="Gorilla_L">
+<meta property="og:description" content="PS：本文为本人学习的一个过程，大神可直接忽略，若发现有错误之处，请评论留言，小编会及时更正，不喜勿喷，谢谢。  最近公司叫预研一下插件化相关的技术，发现现在开源社区上，关于插件化这个技术的框架也不多，Android插件化主流的实现方案主要就是这两个框架，一个是dynamic-load-apk（简称DL），另一个则是奇虎360手机助手团队的DroidPlugin，这两个框架各有各的优缺点，下面就简">
+<meta property="og:locale" content="java">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-7e38132c4898fa6e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-68a8d3b1be323006.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-d3ed9fe68e145e81.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-36b0c3adb1530d8a.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-0305751ada8df784.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-abd3e47b6cd072a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-7e5fe2772a451f93.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-02901bb8f5a18d43.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-5f6f17055b175708.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-447687ba2d2352af.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-efd6cd504055701b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-5661720cc9626df0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-ac2e30ffb771f0bd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-b3798e7c616cef55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-8e10741f92e55fc3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-4ab5f2d712ec1e03.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-f5e1afa88e378749.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/2338327-a4d7d541c68c6f79.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2019-01-25T07:24:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用">
+<meta name="twitter:description" content="PS：本文为本人学习的一个过程，大神可直接忽略，若发现有错误之处，请评论留言，小编会及时更正，不喜勿喷，谢谢。  最近公司叫预研一下插件化相关的技术，发现现在开源社区上，关于插件化这个技术的框架也不多，Android插件化主流的实现方案主要就是这两个框架，一个是dynamic-load-apk（简称DL），另一个则是奇虎360手机助手团队的DroidPlugin，这两个框架各有各的优缺点，下面就简">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/2338327-7e38132c4898fa6e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/pace.min.js"></script>
+  
+
+  
+  
+
+</head>
+</html>
+<body>
+  <div id="container">
+      <header id="header">
+    <div id="banner"></div>
+    <div id="header-outer">
+        <div id="header-menu" class="header-menu-pos animated">
+            <div class="header-menu-container">
+                <a href="/" class="left">
+                    <span class="site-title">MinHow&#39;s Blog</span>
+                </a>
+                <nav id="header-menu-nav" class="right">
+                    
+                    <a href="/">
+                        <i class="fa fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                    
+                    <a href="/archives">
+                        <i class="fa fa-archive"></i>
+                        <span>Archives</span>
+                    </a>
+                    
+                    <a href="/about">
+                        <i class="fa fa-user"></i>
+                        <span>About</span>
+                    </a>
+                    
+                </nav>
+                <a class="mobile-header-menu-button">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+        </div>
+        <div id="header-row">
+            <div id="logo">
+                <a href="/">
+                    <img src="/images/logo.png" alt="logo">
+                </a>
+            </div>
+            <div class="header-info">
+                <div id="header-title">
+                    
+                    <h2>
+                        MinHow&#39;s Blog
+                    </h2>
+                    
+                </div>
+                <div id="header-description">
+                    
+                    <h3>
+                        一个专注 WEB 开发的技术博客
+                    </h3>
+                    
+                </div>
+            </div>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a title="MinHow" target="_blank" href="//minhow.com">
+                            <i class="fa fa-home fa-2x"></i></a>
+                    
+                        <a title="Github" target="_blank" href="//github.com/wongminho">
+                            <i class="fa fa-github fa-2x"></i></a>
+                    
+                        <a title="Weibo" target="_blank" href="//weibo.com/WongMinHo">
+                            <i class="fa fa-weibo fa-2x"></i></a>
+                    
+                        <a title="Twitter" target="_blank" href="//twitter.com/huangminhow">
+                            <i class="fa fa-twitter fa-2x"></i></a>
+                    
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+      <div class="outer">
+        <section id="main" class="body-wrap"><article id="post-Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="post-title" itemprop="name">
+      Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用
+    </h1>
+    <div class="post-title-bar">
+      <ul>
+          
+        <li>
+          <i class="fa fa-calendar"></i>  2019-01-25
+        </li>
+        <li>
+          <i class="fa fa-eye"></i>
+          <span id="busuanzi_value_page_pv"></span>
+        </li>
+      </ul>
+    </div>
+  
+
+          
+      </header>
+    
+    <div class="article-entry post-content" itemprop="articleBody">
+      
+            
+            <p><strong>PS：本文为本人学习的一个过程，大神可直接忽略，若发现有错误之处，请评论留言，小编会及时更正，不喜勿喷，谢谢。</strong></p>
+<blockquote>
+<p>最近公司叫预研一下插件化相关的技术，发现现在开源社区上，关于插件化这个技术的框架也不多，Android插件化主流的实现方案主要就是这两个框架，一个是dynamic-load-apk（简称DL），另一个则是奇虎360手机助手团队的DroidPlugin，这两个框架各有各的优缺点，下面就简单介绍一下两者的优缺点。</p>
+</blockquote>
+<p>#####DynamicLoadApk是由团队维护的，但是目前已经很长时间没有更新了，途牛用的就是这个插件化框架 </p>
+<p>######优点：</p>
+<ul>
+<li>插件不依赖宿主，对宿主开发者透明，提供三种依赖方式</li>
+<li><p>宿主和插件可以频繁交互，启动时间短<br>######缺点：</p>
+</li>
+<li><p>插件apk必须实现DLBasePluginActivity，属于侵入式的，以及不支持service</p>
+</li>
+<li>宿主调用插件和插件内部的相互调用都要使用DL提供的方法，而不能使用Android原生的api，例如：启动Activity</li>
+<li><p>插件开发有一套规定，因此造成插件开发门槛高，学习成本高<br>#####DroidPlugin是360公司开源的一个框架，已经在360手机助手上使用<br>######优点：</p>
+</li>
+<li><p>宿主和插件完全隔离，插件不依赖宿主，可以独立安装运行</p>
+</li>
+<li>低入侵设计，插件不需要继承任何类</li>
+<li>插件apk和普通apk一样的，所以插件开发没有门槛</li>
+<li>开发的时候集成简单，只需要三两个步骤即可集成到一个新的项目中</li>
+<li><p>有大公司维护,有360手机助手这样的商用app在使用<br>######缺点：</p>
+</li>
+<li><p>插件启动速度比较慢</p>
+</li>
+<li>无法在插件中发送具有自定义资源的Notification，例如： a. 带自定义RemoteLayout的Notification b. 图标通过R.drawable.XXX指定的通知（插件系统会自动将其转化为Bitmap）</li>
+<li>无法在插件中注册一些具有特殊Intent Filter的Service、Activity、BroadcastReceiver、ContentProvider等组件以供Android系统、已经安装的其他APP调用。</li>
+<li>缺乏对Native层的Hook，对某些带native代码的apk支持不好，可能无法运行。比如一部分游戏无法当作插件运行。</li>
+</ul>
+<p>######附上两个框架的GitHub地址</p>
+<blockquote>
+<p>DynamicLoadApk的Github地址:<br><a href="https://github.com/singwhatiwanna/dynamic-load-apk" target="_blank" rel="noopener">https://github.com/singwhatiwanna/dynamic-load-apk</a> </p>
+</blockquote>
+<blockquote>
+<p>DroidPlugin的Github地址:<br><a href="https://github.com/Qihoo360/DroidPlugin" target="_blank" rel="noopener">https://github.com/Qihoo360/DroidPlugin</a></p>
+</blockquote>
+<p>在本文中主要简单地介绍一下DroidPlugin框架，DynamicLoadApk框架以后有时间再简单介绍。</p>
+<p>###1. DroidPlugin简介<br>Android大型项目中为了减小apk的体积，可以采用插件化的方法，即一些不常用的功能独立成插件，当用户需要使用的时候再从服务器上下载回来，动态加载。这样就避免了为了满足所有用户需求而把功能全部打包到apk，导致apk体积的膨胀。所谓的插件，其实也是一个apk，但是一般都依赖正式对外发布的app，也叫宿主。</p>
+<p>#####1.1 说明<br>下面引入一下官方说明：</p>
+<blockquote>
+<p>DroidPlugin是360手机助手在Android系统上实现了一种新的插件机制:<br>它可以在无需安装、修改的情况下运行APK文件,此机制对改进大型APP的架构，实现多团队协作开发具有一定的好处。</p>
+</blockquote>
+<p>#####1.2 特点</p>
+<blockquote>
+<ol>
+<li>支持Androd 2.3以上系统</li>
+<li>插件APK完全不需做任何修改，可以独立安装运行、也可以做插件运行。要以插件模式运行某个APK，你无需重新编译、无需知道其源码。</li>
+<li>插件的四大组件完全不需要在Host程序中注册，支持Service、Activity、BroadcastReceiver、ContentProvider四大组件</li>
+<li>插件之间、Host程序与插件之间会互相认为对方已经”安装”在系统上了。</li>
+<li>API低侵入性：极少的API。HOST程序只是需要一行代码即可集成Droid Plugin</li>
+<li>超强隔离：插件之间、插件与Host之间完全的代码级别的隔离：不能互相调用对方的代码。通讯只能使用Android系统级别的通讯方法。</li>
+<li>支持所有系统API 资源完全隔离：插件之间、与Host之间实现了资源完全隔离，不会出现资源窜用的情况。</li>
+<li>实现了进程管理，插件的空进程会被及时回收，占用内存低。</li>
+<li>插件的静态广播会被当作动态处理，如果插件没有运行（即没有插件进程运行），其静态广播也永远不回被触发。<br><img src="http://upload-images.jianshu.io/upload_images/2338327-7e38132c4898fa6e.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="插件特点.jpg"></li>
+</ol>
+</blockquote>
+<p>###2. 使用方法</p>
+<p>#####2.1 集成<br>在项目中集成DroidPlugin项目非常简单，只需以下几步即可：</p>
+<ol>
+<li>我们只需要将Droid Plugin当作一个lib工程应用到主项目中。</li>
+<li><p>在<strong><em>AndroidManifest.xml</em></strong>中使用插件的<strong>com.morgoo.droidplugin.PluginApplication</strong>：</p>
+<pre><code>&lt;application 
+     android:name=&quot;com.morgoo.droidplugin.PluginApplication&quot;
+     android:label=&quot;@string/app_name&quot;
+     android:icon=&quot;@drawable/ic_launcher&quot;
+</code></pre></li>
+<li><p>如果你使用自定义的Application，那么你需要在自定义的Application class <strong>onCreate</strong>和<strong>attachBaseContext</strong>方法中添加如下代码：</p>
+<pre><code>@Override
+ public void onCreate() {
+     super.onCreate();
+     //这里必须在super.onCreate方法之后，顺序不能变
+     PluginHelper.getInstance().applicationOnCreate(getBaseContext());
+ }
+
+ @Override
+ protected void attachBaseContext(Context base) {
+     PluginHelper.getInstance().applicationAttachBaseContext(base);
+     super.attachBaseContext(base);
+ }
+</code></pre><p> <strong>PS: 其实DroidPlugin的PluginApplication里面也是添加了同样的代码。</strong></p>
+<pre><code>public class PluginApplication extends Application {
+   private static final String TAG = PluginApplication.class.getSimpleName();
+
+   @Override
+   public void onCreate() {
+       super.onCreate();
+       PluginHelper.getInstance().applicationOnCreate(getBaseContext());
+   }
+
+   @Override
+   protected void attachBaseContext(Context base) {
+       PluginHelper.getInstance().applicationAttachBaseContext(base);
+       super.attachBaseContext(base);
+   }
+}
+</code></pre></li>
+<li><p>将插件中<strong><em>Libraries\DroidPlugin\AndroidManifest.xml</em></strong>中<strong>所有</strong>的<strong><em>provider</em></strong>对应的<strong><em>authorities</em></strong>修改成自己的，默认为<strong><em>com.morgoo.droidplugin_stub_P00</em></strong>，如下：</p>
+<pre><code>&lt;provider
+    android:name=&quot;com.morgoo.droidplugin.stub.ContentProviderStub$StubP00&quot;
+    android:authorities=&quot;com.morgoo.droidplugin_stub_P00&quot;
+    android:exported=&quot;false&quot;
+    android:label=&quot;@string/stub_name_povider&quot; /&gt;
+</code></pre><p> 可以修改为自己的包名，如: <strong><em>com.example.droidplugindemo</em></strong> 防止跟其它本插件使用者冲突：</p>
+<pre><code>&lt;provider
+    android:name=&quot;com.morgoo.droidplugin.stub.ContentProviderStub$StubP00&quot;
+    android:authorities=&quot;com.example.droidplugindemo_stub_P00&quot;
+    android:exported=&quot;false&quot;
+    android:label=&quot;@string/stub_name_povider&quot; /&gt;
+</code></pre><p> <strong>注意:只修改前面的com.morgoo.droidplugin部分，后面的P00,P01…..不要改。</strong><br>如果不改<strong><em>authorities</em></strong>的话，会和360手机助手发生冲突，手机上装了360手机助手，再装这个就装不上去了</p>
+<p> 并且修改<strong><em>PluginManager.STUB_AUTHORITY_NAME</em></strong> 为你的值:</p>
+<pre><code>PluginManager.STUB_AUTHORITY_NAME=&quot;com.example.droidplugindemo&quot;
+</code></pre></li>
+<li><p>到此，集成就大功告成。</p>
+</li>
+</ol>
+<p>#####2.2 安装、卸载插件</p>
+<ol>
+<li><p><strong>安装、更新插件</strong>,使用如下方法：</p>
+<pre><code>int PluginManager.getInstance().installPackage(String filepath, int flags)
+</code></pre><p> <strong>说明</strong>：安装插件到插件系统中，<strong><em>filepath</em></strong>为插件apk路径，<strong><em>flags</em></strong>可以设置为<strong>0</strong>，如果要<strong>更新插件</strong>，则设置为<strong><em>PackageManagerCompat.INSTALL_REPLACE_EXISTING</em></strong>返回值及其含义请参见<strong><em>PackageManagerCompat</em></strong>类中的相关字段。</p>
+<pre><code>/**
+ * 以下每个常亮的注释是小编根据常亮命名来猜的，不代表官方说明，小编暂未找到官方解释。
+ */
+public class PackageManagerCompat {
+    public static final int DELETE_FAILED_INTERNAL_ERROR = -1;// 删除失败，内部错误
+    public static final int DELETE_SUCCEEDED = 1;// 删除成功
+    public static final int INSTALL_SUCCEEDED = 1;// 安装成功
+    public static final int INSTALL_FAILED_INTERNAL_ERROR = -110;// 安装失败，内部错误
+    public static final int INSTALL_FAILED_INVALID_APK = -2;// 安装失败，无效的apk
+    public static final int INSTALL_REPLACE_EXISTING = 0x00000002;// 安装替换现有的
+    public static final int INSTALL_FAILED_ALREADY_EXISTS = -1;// 安装失败，已经存在
+}
+</code></pre></li>
+<li><p><strong>卸载插件</strong>，使用如下方法：</p>
+<pre><code>int PluginManager.getInstance().deletePackage(String packageName,int flags);
+</code></pre><p> <strong>说明</strong>：从插件系统中<strong>卸载</strong>某个插件，<strong><em>packageName</em></strong>传插件包名即可，<strong><em>flags</em></strong>传<strong>0</strong>。</p>
+</li>
+<li><p><strong>启动插件</strong>：启动插件的<strong><em>Activity、Service</em></strong>等都和你启动一个以及安装在系统中的app一样，使用系统提供的相关API即可。组件间通讯也是如此。</p>
+</li>
+</ol>
+<p>###3. 基本架构<br>一个宿主App（Host程序），其他apk（Plugin App 1，Plugin App 2，…..）以插件的形式被宿主App加载，插件无需安装。</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-68a8d3b1be323006.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="基本架构.jpg"></p>
+</blockquote>
+<p>###4. 插件Host程序架构</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-d3ed9fe68e145e81.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="插件Host程序架构.jpg"></p>
+</blockquote>
+<p>###5. 实现原理<br>本文只根据官方PPT介绍该框架的基本原理，具体的实现原理，请读者自行下载源码来分析以及查阅相关资料去了解，本文不对实现原理进行深入研究。</p>
+<p>###6. 基本原理</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-36b0c3adb1530d8a.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="基本原理.jpg"></p>
+</blockquote>
+<p>#####6.1 共享进程</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-0305751ada8df784.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="共享进程.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-abd3e47b6cd072a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="共享进程2.png"></p>
+</blockquote>
+<p>#####6.2 Hook(API欺骗)之动态代理</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-7e5fe2772a451f93.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Hook之动态代理.png"></p>
+</blockquote>
+<p>#####6.3 Hook(API欺骗)之Binder代理</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-02901bb8f5a18d43.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Hook之Binder代理.png"></p>
+</blockquote>
+<p>#####6.4 Hook(API欺骗)之Instrumentation代理</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-5f6f17055b175708.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Hook之Instrumentation欺骗.png"></p>
+</blockquote>
+<p>###7. 解决四大组件注册问题</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-447687ba2d2352af.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="解决四大组件注册问题.png"></p>
+</blockquote>
+<p>#####7.1 占坑</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-efd6cd504055701b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="占坑.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-5661720cc9626df0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="占坑-解决Activity注册问题.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-ac2e30ffb771f0bd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="占坑-解决ContentProvider注册问题.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-b3798e7c616cef55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="占坑-解决Service注册问题.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-8e10741f92e55fc3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="占坑-解决广播注册问题.png"></p>
+</blockquote>
+<p>###8. 自己实现包管理服务</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-4ab5f2d712ec1e03.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自己实现包管理服务.png"><br><img src="http://upload-images.jianshu.io/upload_images/2338327-f5e1afa88e378749.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自己实现Activity管理服务.png"></p>
+</blockquote>
+<p>###9. 适配</p>
+<blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/2338327-a4d7d541c68c6f79.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="适配.png"></p>
+</blockquote>
+<p>#####小结<br>DroidPlugin是奇虎360手机助手团队的产物，而且在360手机助手也应用上了，所以他们团队应该也还会维护，在Android插件化领域，DroidPlugin是目前实现的比较好的插件化框架，插件apk完全与宿主隔离而且不受侵入，优点也很明显，而且这个框架集成也比较简单，坑多不多，这个就要读者自己去踩踩了，但是目前小编还没踩到什么大坑。</p>
+
+            <div class="post-copyright">
+    <div class="content">
+        <p>最后更新： 2019年01月25日 15:24</p>
+        <p>原始链接： <a class="post-url" href="/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/" title="Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用">http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/</a></p>
+        <footer>
+            <a href="http://yoursite.com">
+                <img src="/images/logo.png" alt="licanming">
+                licanming
+            </a>
+        </footer>
+    </div>
+</div>
+
+      
+        
+            
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;">赏</a>
+</div>
+
+<div id="reward" class="post-modal reward-lay">
+    <a class="close" href="javascript:;" id="reward-close">×</a>
+    <span class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        请我吃糖~
+        <i class="icon icon-quote-right"></i>
+    </span>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/images/wechat_code.jpg" alt="打赏二维码">
+        </div>
+        <div class="reward-select">
+            
+            <label class="reward-select-item checked" data-id="wechat" data-wechat="/images/wechat_code.jpg">
+                <img class="reward-select-item-wechat" src="/images/wechat.png" alt="微信">
+            </label>
+            
+            
+            <label class="reward-select-item" data-id="alipay" data-alipay="/images/alipay_code.jpg">
+                <img class="reward-select-item-alipay" src="/images/alipay.png" alt="支付宝">
+            </label>
+            
+        </div>
+    </div>
+</div>
+
+
+        
+    </div>
+    <footer class="article-footer">
+        
+        
+<div class="post-share">
+    <a href="javascript:;" id="share-sub" class="post-share-fab">
+        <i class="fa fa-share-alt"></i>
+    </a>
+    <div class="post-share-list" id="share-list">
+        <ul class="share-icons">
+          <li>
+            <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/&title=《Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用》 — Gorilla_L&pic=http://yoursite.comimages/logo.png" data-title="微博">
+              <i class="fa fa-weibo"></i>
+            </a>
+          </li>
+          <li>
+            <a class="weixin share-sns" id="wxFab" href="javascript:;" data-title="微信">
+              <i class="fa fa-weixin"></i>
+            </a>
+          </li>
+          <li>
+            <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/&title=《Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用》 — Gorilla_L&source=学习总结、累积知识、记录生活" data-title="QQ">
+              <i class="fa fa-qq"></i>
+            </a>
+          </li>
+          <li>
+            <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/" data-title="Facebook">
+              <i class="fa fa-facebook"></i>
+            </a>
+          </li>
+          <li>
+            <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用》 — Gorilla_L&url=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/&via=http://yoursite.com" data-title="Twitter">
+              <i class="fa fa-twitter"></i>
+            </a>
+          </li>
+          <li>
+            <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/" data-title="Google+">
+              <i class="fa fa-google-plus"></i>
+            </a>
+          </li>
+        </ul>
+     </div>
+</div>
+<div class="post-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;" id="wxShare-close">×</a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://yoursite.com/2019/01/25/Android插件化框架DroidPlugin-学习笔记（一）：简单介绍及集成使用/" alt="微信分享二维码">
+</div>
+
+<div class="mask"></div>
+
+        
+        <ul class="article-footer-menu">
+            
+            
+  <li class="article-footer-tags">
+    <i class="fa fa-tags"></i>
+      
+    <a href="/tags/Android/" class="color3">Android</a>
+      
+  </li>
+
+        </ul>
+        
+    </footer>
+  </div>
+</article>
+
+
+
+<nav id="article-nav">
+  
+  
+    <a href="/2019/01/25/AndroidStudio-找不到cache-properties-系统找不到指定的文件。/" id="article-nav-older" class="article-nav-link-wrap">
+      <span class="article-nav-title">AndroidStudio 找不到cache.properties (系统找不到指定的文件。)</span>
+      <i class="fa fa-hand-o-right" aria-hidden="true"></i>
+    </a>
+  
+</nav>
+
+
+
+    
+</section>
+        
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+      <p>
+        Powered by  <a href="http://hexo.io/" target="_blank">Hexo</a>
+        Theme <a href="//github.com/wongminho/hexo-theme-miho" target="_blank">MiHo</a>
+      &copy; 2019 licanming<br>
+      </p>
+    </div>
+  </div>
+</footer>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+  var mihoConfig = {
+      root: "http://yoursite.com",
+      animate: true,
+      isHome: false,
+      share: true,
+      reward: 1
+  }
+</script>
+<div class="sidebar">
+    <div id="sidebar-search" title="Search">
+        <i class="fa fa-search"></i>
+    </div>
+    <div id="sidebar-category" title="Categories">
+        <i class="fa fa-book"></i>
+    </div>
+    <div id="sidebar-tag" title="Tags">
+        <i class="fa fa-tags"></i>
+    </div>
+    <div id="sidebar-top">
+        <span class="sidebar-top-icon"><i class="fa fa-angle-up"></i></span>
+    </div>
+</div>
+<div class="sidebar-menu-box" id="sidebar-menu-box">
+    <div class="sidebar-menu-box-container">
+        <div id="sidebar-menu-box-categories">
+            
+        </div>
+        <div id="sidebar-menu-box-tags">
+            <a href="/tags/Android/" style="font-size: 10px;">Android</a>
+        </div>
+    </div>
+    <a href="javascript:;" class="sidebar-menu-box-close">&times;</a>
+</div>
+<div class="mobile-header-menu-nav" id="mobile-header-menu-nav">
+    <div class="mobile-header-menu-container">
+        <span class="title">Menus</span>
+        <ul class="mobile-header-menu-navbar">
+            
+            <li>
+                <a href="/">
+                    <i class="fa fa-home"></i><span>Home</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/archives">
+                    <i class="fa fa-archive"></i><span>Archives</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="/about">
+                    <i class="fa fa-user"></i><span>About</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    <div class="mobile-header-tag-container">
+        <span class="title">Tags</span>
+        <div id="mobile-header-container-tags">
+            <a href="/tags/Android/" style="font-size: 10px;">Android</a>
+        </div>
+    </div>
+</div>
+<div class="search-wrap">
+    <span class="search-close">&times;</span>
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+            <i class="icon icon-lg icon-chevron-left"></i>
+        </a>
+        <input class="search-field" placeholder="Search..." id="keywords">
+        <a id="search-submit" href="javascript:;">
+            <i class="fa fa-search"></i>
+        </a>
+    <div class="search-container" id="search-container">
+        <ul class="search-result" id="search-result">
+        </ul>
+    </div>
+</div>
+
+<div id="search-tpl">
+    <li class="search-result-item">
+        <a href="{url}" class="search-item-li">
+            <span class="search-item-li-title" title="{title}">{title}</span>
+        </a>
+    </li>
+</div>
+<script src="/js/search.js"></script>
+<script src="/js/main.js"></script>
+
+
+  <script src="//cdn.bootcss.com/particles.js/2.0.0/particles.min.js"></script>
+  <div id="particles"></div>
+  <script src="/js/particles.js"></script>
+
+
+
+
+
+
+
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  <script src="//cdn.bootcss.com/scrollReveal.js/3.0.5/scrollreveal.js"></script>
+  <script src="/js/animate.js"></script>
+
+
+  <script src="/js/pop-img.js"></script>
+  <script>
+     $(".article-entry p img").popImg();
+  </script>
+
+  </div>
+</body>
+</html>
